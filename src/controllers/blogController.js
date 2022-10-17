@@ -326,4 +326,4 @@ let deleteBlogs = async function (req, res) {
     }
 }
 
-module.exports={createBlog,filterBlogs,updateBlog,deleteBlog}
+module.exports={createBlog,filterBlogs,updateBlog,deleteBlog,deleteBlogs}
