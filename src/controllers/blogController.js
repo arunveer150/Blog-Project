@@ -55,8 +55,6 @@ let createBlog = async function (req, res) {
             return res.status(400).send({status:false,message:"tags are empty....."})
         }
 
-       // let tag=data.tags.split(',')
-
         obj.tags=data.tags
     }
 
@@ -64,8 +62,6 @@ let createBlog = async function (req, res) {
         if(data.subcategory.length===0){
             return res.status(400).send({status:false,message:"sub categorys are empty....."})
         }
-
-        //let sub=data.subCategory.split(',')
 
         obj.subcategory=data.subcategory
 
@@ -77,7 +73,7 @@ let createBlog = async function (req, res) {
         }
 
         if(typeof data.isDeleted!="boolean"){
-            return res.status(400).send({status:false,message:"isDeleted should be in boolean form...."})
+            return res.status(400).send({status:false,message:"isDeleted should be in boolean form  true/false ...."})
         }
 
         obj.isDeleted=data.isDeleted
@@ -89,18 +85,18 @@ let createBlog = async function (req, res) {
         }
 
         if(typeof data.isPublished!="boolean"){
-            return res.status(400).send({status:false,message:"isPublished should be in boolean form...."})
+            return res.status(400).send({status:false,message:"isPublished should be in boolean form  true/false ...."})
         }
 
         obj.isPublished=data.isPublished
     }
 
         let create = await blog.create(obj)
+        return res.status(201).send({ status: true, data: create })
 
-        res.status(201).send({ status: true, data: create })
     }
     catch (err) {
-        res.status(500).send({ error: err.message })
+        return res.status(500).send({ status:false,error: err.message })
     }
 }
 
@@ -153,11 +149,11 @@ let filterBlogs = async function (req, res) {
 
         let filter=await blog.find(obj)
 
-        return res.status(200).send({status:false,data:filter})
+        return res.status(200).send({status:true,data:filter})
 
     }
     catch (err) {
-        res.status(500).send({ error: err.message })
+       return res.status(500).send({ status:false,error: err.message })
     }
 }
 
@@ -240,7 +236,7 @@ let updateBlog = async function (req, res) {
         return res.status(200).send({ status: true, msg: update1 })
     }
     catch (err) {
-        res.status(500).send({ error: err.message })
+        return res.status(500).send({ status:false,error: err.message })
     }
 }
 
@@ -253,8 +249,8 @@ const deleteBlog = async function (req, res) {
         }
 
         let data = await blog.findOne({ _id: blogId, isDeleted: false })
-        if (!data) {
 
+        if (!data) {
             return res.status(404).send({ status: false, msg: "no document found" })
         }
 
@@ -262,12 +258,12 @@ const deleteBlog = async function (req, res) {
             return res.status(400).send({status:false,message:"Authorisation failed..."})
         }
 
-            let DeleteBlog = await blog.findOneAndUpdate({ _id: blogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
-            res.status(200).send()
+            let deleteBlog = await blog.findOneAndUpdate({ _id: blogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
+            return res.status(200).send()
 
     }
     catch (err) {
-        res.status(500).send({ error: err.message })
+        return res.status(500).send({status:false,msg: err.message })
     }
 }
 
@@ -327,7 +323,7 @@ let deleteBlogs = async function (req, res) {
         return res.status(200).send({ status: true, data: deleteB })
     }
     catch (err) {
-        res.status(500).send({ error: err.message })
+        return res.status(500).send({ status:false,msg: err.message })
     }
 }
 

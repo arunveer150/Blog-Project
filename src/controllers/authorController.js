@@ -6,6 +6,11 @@ const jwt = require("jsonwebtoken")
 const createAuthor = async function (req, res) {
     try {
         let data = req.body
+
+        if(Object.keys(data).length==0){
+          return res.status(400).send({status:false,message:"Please enter details...."})
+        }
+
         let check = data.fname
 
     if(!check){return   res.status(400).send({status : false , msg : "Please enter your First Name"})}
@@ -44,36 +49,40 @@ if(checkDuplicateEmail) return res.status(400).send({status:false , msg: "email 
      {return res.status(400).send({status : false , msg : "Please enter your Password"})}
          
             let savedData = await AuthorModel.create(data)
-            res.status(201).send({ msg: savedData })
+           return res.status(201).send({ msg: savedData })
         
          
     }
     catch (err) {
-        console.log("This is the error :", err.message)
-        res.status(500).send({ msg: "Error", error: err.message })
+        return res.status(500).send({ status:false, msg: err.message })
     }
 }
 
 
 const loginUser = async function (req, res) {
+try{
+  if(Object.keys(req.body).length==0){
+    return res.status(400).send({status:false,message:"Please enter details...."})
+  }
+
    let userName = req.body.email;
    
    if(!userName){
     return res.status(400).send({status : false , msg : "Please enter your email"})
    }
+
     let password = req.body.password;
 
     if(!password){
       return res.status(400).send({status : false , msg : "Please enter your password"})
      }
   
-    let user = await AuthorModel.findOne({ email: userName, password: password });
+    let user = await AuthorModel.findOne({ email: userName, password: password })
+
     if (!user)
-      return res.send({
-        status: false,
-        msg: "username or the password is not corerct",
-      });
-      let token = jwt.sign(
+      return res.send({status: false,msg: "username or the password is not corerct"});
+
+      let token = await jwt.sign(
         {
           userId: user._id.toString(),
           
@@ -81,8 +90,13 @@ const loginUser = async function (req, res) {
         "functionup-radon"
       );
       res.setHeader("x-api-key", token);
-      res.status(201).send({ status: true, data: token });
-      }
+     return res.status(201).send({ status: true, data: token });
+    }
+
+    catch(err){
+      return res.status(500).send({status:false,msg:err.message})
+    }
+  }
     
 
 
