@@ -2,6 +2,7 @@ const AuthorModel = require("../models/authorModel")
 const emailValidation=require("email-validator")
 const jwt = require("jsonwebtoken")
 
+var nameRegex=/^[A-Za-z]+$/
 
 const createAuthor = async function (req, res) {
     try {
@@ -15,9 +16,16 @@ const createAuthor = async function (req, res) {
 
     if(!check){return   res.status(400).send({status : false , msg : "Please enter your First Name"})}
     
+    if(!nameRegex.test(check)){
+      return res.status(400).send({status:false,msg:"last name should be only alphabets..."})
+    }
+
     let check1 = data.lname
     if(!check1){return res.status(400).send({status : false , msg : "Please enter your Last Name"})}
     
+    if(!nameRegex.test(check1)){
+      return res.status(400).send({status:false,msg:"last name should be only alphabets..."})
+    }
 
     let check2 = data.title
     if(!check2)

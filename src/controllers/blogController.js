@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const author = require('../models/authorModel.js')
 const blog = require('../models/blogModel.js')
 
+var nameRegex=/^[A-Za-z]+$/
+
 let createBlog = async function (req, res) {
     try {
         let data = req.body
