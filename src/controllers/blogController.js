@@ -148,7 +148,7 @@ let filterBlogs = async function (req, res) {
                 return res.status(400).send({status:false,message:"subcategory field is empty..."})
             }
             let sub=data.subcategory.split(',')
-            obj.subcategory={$in:data.subcategory}
+            obj.subcategory={$in:sub}
         }
 
         let filter=await blog.find(obj)
@@ -173,12 +173,31 @@ let updateBlog = async function (req, res) {
         }
 
         let dataById = await blog.findOne({_id:blogId,isDeleted:false})
-        if(!dataById)
-    {return res.status(404).send({status: false, msg : "No such blog exists"})}
 
-    if(req.user.userId!=blogId.authorId){
+        if(!dataById){return res.status(404).send({status: false, msg : "No such blog exists"})}
+
+    if(req.user.userId!=dataById.authorId){
         return res.status(400).send({status:false,message:"Authorisation failed..."})
     }
+
+    if(bodyData.title){
+        if(bodyData.title.length==0){
+            return res.status(400).send({status:false,message:"title field is empty..."})
+        }
+
+        obj.title=bodyData.title
+
+    }
+
+
+    if(bodyData.body){
+        if(bodyData.body.length==0){
+            return res.status(400).send({status:false,message:"body field is empty..."})
+        }
+
+        obj.body=bodyData.body
+    }
+
 
     if(bodyData.tags){
         let tag = dataById.tags
@@ -191,6 +210,8 @@ let updateBlog = async function (req, res) {
                 tag.push(newTag[i])
             }
         }
+
+        obj.tags=tag
 
     }
 
@@ -206,31 +227,17 @@ let updateBlog = async function (req, res) {
             }
         }
 
-    }
-
-    if(bodyData.title){
-        if(bodyData.title.length==0){
-            return res.status(400).send({status:false,message:"title field is empty..."})
-        }
-
-        obj.title=bodyData.title
+        obj.subcategory=subCategory
 
     }
 
-    if(bodyData.body){
-        if(bodyData.body.length==0){
-            return res.status(400).send({status:false,message:"body field is empty..."})
-        }
-
-        obj.body=bodyData.body
-    }
 
     obj.isPublished=true
 
     obj.publishedAt=Date.now()
 
-        let update1 = await blog.findOneAndUpdate({ _id: blogId }, { $set:obj}, { new: true })
-        res.status(200).send({ status: true, msg: update1 })
+        let update1 = await blog.findOneAndUpdate({ _id: blogId },{$set:obj}, { new: true })
+        return res.status(200).send({ status: true, msg: update1 })
     }
     catch (err) {
         res.status(500).send({ error: err.message })
@@ -270,8 +277,7 @@ let deleteBlogs = async function (req, res) {
 
         let obj={isDeleted:false,isPublished:false}
 
-        if(data.authorId){
-            if(data.authorId.length===0){
+            if(!data.authorId){
                 return res.status(400).send({status:false,message:"AuthorId field is empty..."})
             }
 
@@ -287,7 +293,6 @@ let deleteBlogs = async function (req, res) {
             }
 
              obj.authorId=data.authorId
-        }
 
         if(data.category){
             if(data.category.length===0){
@@ -312,14 +317,14 @@ let deleteBlogs = async function (req, res) {
                 return res.status(400).send({status:false,message:"subcategory field is empty..."})
             }
             let sub=data.subcategory.split(',')
-            obj.subcategory={$in:data.subcategory}
+            obj.subcategory={$in:sub}
         }
 
-        let deleteB = await blog.findOneAndUpdate(obj,{ $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
+        let deleteB = await blog.updateMany(obj,{ $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
         if (!deleteB) {
             return res.status(400).send({ status: false, msg: "No data found" })
         }
-        return res.status(200).send({ status: true, data: data })
+        return res.status(200).send({ status: true, data: deleteB })
     }
     catch (err) {
         res.status(500).send({ error: err.message })
