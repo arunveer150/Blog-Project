@@ -256,11 +256,13 @@ const deleteBlog = async function (req, res) {
             return res.status(404).send({ status: false, msg: "no document found" })
         }
 
+        //--------- Authorisation--------
+
         if(req.user.userId!=data.authorId){
             return res.status(400).send({status:false,message:"Authorisation failed..."})
         }
 
-            let deleteBlog = await blog.findOneAndUpdate({ _id: blogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
+             await blog.findOneAndUpdate({ _id: blogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
             return res.status(200).send()
 
     }
@@ -285,6 +287,8 @@ let deleteBlogs = async function (req, res) {
 
             let checkAuthor = await author.findById(data.authorId)
              if(!checkAuthor){ return res.status(404).send({status : false, msg : "Author does not exist"})}
+
+             //--------- Authorisation--------
 
              if(req.user.userId!=data.authorId){
                 return res.status(400).send({status:false,message:"Authorisation failed..."})
@@ -320,7 +324,7 @@ let deleteBlogs = async function (req, res) {
 
         let deleteB = await blog.updateMany(obj,{ $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
         if (!deleteB) {
-            return res.status(400).send({ status: false, msg: "No data found" })
+            return res.status(404).send({ status: false, msg: "No data found" })
         }
         return res.status(200).send({ status: true, data: deleteB })
     }
